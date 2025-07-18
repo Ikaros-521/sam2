@@ -9,9 +9,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-APP_ROOT = os.getenv("APP_ROOT", "/opt/sam2")
+APP_ROOT = os.getenv("APP_ROOT", "/mnt/qukan/sam2")
 
-API_URL = os.getenv("API_URL", "http://localhost:7263")
+API_URL = os.getenv("API_URL", "http://172.16.95.191:7263")
 
 MODEL_SIZE = os.getenv("MODEL_SIZE", "base_plus")
 

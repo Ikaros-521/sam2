@@ -1,0 +1,8 @@
+imagesize
+strawberry-graphql
+dataclasses_json
+av
+flask
+flask_cors
+pycocotools
+decord

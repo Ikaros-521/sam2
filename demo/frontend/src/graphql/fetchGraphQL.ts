@@ -32,7 +32,8 @@ export default async function fetchGraphQL(
   cacheConfig: CacheConfig,
   uploadables?: UploadableMap | null,
 ): Promise<GraphQLResponse> {
-  const url = `${endpoint}/graphql`;
+  // const url = `${endpoint}/graphql`;
+  const url = 'http://172.16.95.191:7263/graphql';
 
   const headers: {[name: string]: string} = {};
   const requestInit: RequestInit = {

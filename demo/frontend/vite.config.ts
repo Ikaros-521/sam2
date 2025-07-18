@@ -21,8 +21,17 @@ import {defineConfig} from 'vite';
 import babel from 'vite-plugin-babel';
 import relay from 'vite-plugin-relay';
 import {stylexPlugin} from 'vite-plugin-stylex-dev';
+// import fs from 'fs';
 
 export default defineConfig({
+  server: {
+    host: '0.0.0.0', // 监听所有 IP
+    // port: 你想要的端口号（可选）
+    // https: {
+    //   key: fs.readFileSync('key.pem'),
+    //   cert: fs.readFileSync('cert.pem'),
+    // }
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -47,6 +47,7 @@ function isBrowserSupported() {
 
 export default function DemoPageWrapper() {
   const isBrowserUnsupported = !isBrowserSupported();
+  // const isBrowserUnsupported = false;
 
   if (isBrowserUnsupported && isFirefox) {
     const nightlyUrl = 'https://wiki.mozilla.org/Nightly';

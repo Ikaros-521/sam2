@@ -121,7 +121,15 @@ export default class VideoWorkerContext {
   }
 
   public get currentFrame(): VideoFrame | null {
-    return this._decodedVideo?.frames[this._frameIndex].bitmap ?? null;
+    if (
+      !this._decodedVideo ||
+      !this._decodedVideo.frames ||
+      this._frameIndex < 0 ||
+      this._frameIndex >= this._decodedVideo.frames.length
+    ) {
+      return null;
+    }
+    return this._decodedVideo.frames[this._frameIndex].bitmap ?? null;
   }
 
   constructor() {

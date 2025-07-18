@@ -15,4 +15,8 @@
  */
 import {atom} from 'jotai';
 
-export default atom<Error | null>(null);
+// export default atom<Error | null>(null);
+
+const errorReportAtom = atom<Error | null>(null);
+
+export default errorReportAtom;
