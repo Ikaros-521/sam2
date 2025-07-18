@@ -32,32 +32,66 @@ class VideoMetadata:
     video_start_time: float
 
 
+# 定义一个transcode函数，用于将输入的视频文件转换为指定格式
 def transcode(
+    # 输入文件路径
     in_path: str,
+    # 输出文件路径
     out_path: str,
+    # 输入视频元数据
     in_metadata: Optional[VideoMetadata],
+    # 搜索时间
     seek_t: float,
+    # 视频时长（秒）
     duration_time_sec: float,
+    # 保持原始质量
+    keep_original_quality: bool = True,  
 ):
+    # 获取视频编码器
     codec = os.environ.get("VIDEO_ENCODE_CODEC", "libx264")
+    # 获取视频质量参数
     crf = int(os.environ.get("VIDEO_ENCODE_CRF", "23"))
+    # 获取视频帧率
     fps = int(os.environ.get("VIDEO_ENCODE_FPS", "24"))
+    # 获取视频最大宽度
     max_w = int(os.environ.get("VIDEO_ENCODE_MAX_WIDTH", "1280"))
+    # 获取视频最大高度
     max_h = int(os.environ.get("VIDEO_ENCODE_MAX_HEIGHT", "720"))
+    # 获取是否输出详细信息
     verbose = ast.literal_eval(os.environ.get("VIDEO_ENCODE_VERBOSE", "False"))
 
+    # 新增：如果保持原画质，使用原视频参数
+    if keep_original_quality and in_metadata is not None:
+        crf = 18  # 高画质
+        fps = int(in_metadata.fps) if in_metadata.fps else fps
+        max_w = int(in_metadata.width) if in_metadata.width else max_w
+        max_h = int(in_metadata.height) if in_metadata.height else max_h
+
+    # 调用normalize_video函数，将输入视频转换为指定格式
     normalize_video(
+        # 输入文件路径
         in_path=in_path,
+        # 输出文件路径
         out_path=out_path,
+        # 视频最大宽度
         max_w=max_w,
+        # 视频最大高度
         max_h=max_h,
+        # 搜索时间
         seek_t=seek_t,
+        # 视频时长
         max_time=duration_time_sec,
+        # 输入视频元数据
         in_metadata=in_metadata,
+        # 视频编码器
         codec=codec,
+        # 视频质量参数
         crf=crf,
+        # 视频帧率
         fps=fps,
+        # 是否输出详细信息
         verbose=verbose,
+        keep_original_quality=keep_original_quality,  # 传递参数
     )
 
 
@@ -127,44 +161,52 @@ def get_video_metadata(path: str) -> VideoMetadata:
         )
 
 
+# 定义一个函数，用于标准化视频
 def normalize_video(
-    in_path: str,
-    out_path: str,
-    max_w: int,
-    max_h: int,
-    seek_t: float,
-    max_time: float,
-    in_metadata: Optional[VideoMetadata],
-    codec: str = "libx264",
-    crf: int = 23,
-    fps: int = 24,
-    verbose: bool = False,
+    in_path: str,  # 输入视频路径
+    out_path: str,  # 输出视频路径
+    max_w: int,  # 最大宽度
+    max_h: int,  # 最大高度
+    seek_t: float,  # 跳过时间
+    max_time: float,  # 最大时间
+    in_metadata: Optional[VideoMetadata],  # 输入视频元数据
+    codec: str = "libx264",  # 编码器
+    crf: int = 23,  # 压缩等级
+    fps: int = 24,  # 帧率
+    verbose: bool = False,  # 是否输出详细信息
+    keep_original_quality: bool = False,  # 新增参数
 ):
+    # 如果输入视频元数据为空，则获取输入视频的元数据
     if in_metadata is None:
         in_metadata = get_video_metadata(in_path)
 
+    # 断言输入视频元数据中包含视频流
     assert in_metadata.num_video_streams > 0, "no video stream present"
 
+    # 获取输入视频的宽度和高度
     w, h = in_metadata.width, in_metadata.height
+    # 断言宽度和高度不为空
     assert w is not None, "width not available"
     assert h is not None, "height not available"
 
-    # rescale to max_w:max_h if needed & preserve aspect ratio
-    r = w / h
-    if r < 1:
-        h = min(720, h)
-        w = h * r
+    # 新增：如果保持原画质，直接用原始宽高和帧率
+    if keep_original_quality:
+        w = int(w)
+        h = int(h)
     else:
-        w = min(1280, w)
-        h = w / r
-
-    # h264 cannot encode w/ odd dimensions
-    w = int(w)
-    h = int(h)
-    if w % 2 != 0:
-        w += 1
-    if h % 2 != 0:
-        h += 1
+        r = w / h
+        if r < 1:
+            h = min(720, h)
+            w = h * r
+        else:
+            w = min(1280, w)
+            h = w / r
+        w = int(w)
+        h = int(h)
+        if w % 2 != 0:
+            w += 1
+        if h % 2 != 0:
+            h += 1
 
     ffmpeg = shutil.which("ffmpeg")
     cmd = [
