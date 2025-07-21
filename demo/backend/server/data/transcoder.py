@@ -96,58 +96,81 @@ def transcode(
 
 
 def get_video_metadata(path: str) -> VideoMetadata:
+    # 打开视频文件
     with av.open(path) as cont:
+        # 获取视频流数量
         num_video_streams = len(cont.streams.video)
+        # 初始化视频流的宽、高、帧率、视频时长、容器时长、视频开始时间、旋转角度、视频帧数
         width, height, fps = None, None, None
         video_duration_sec = 0
         container_duration_sec = float((cont.duration or 0) / av.time_base)
         video_start_time = 0.0
         rotation_deg = 0
         num_video_frames = 0
+        # 如果视频流数量大于0
         if num_video_streams > 0:
+            # 获取第一个视频流
             video_stream = cont.streams.video[0]
+            # 断言视频流的时间基数不为空
             assert video_stream.time_base is not None
 
             # for rotation, see: https://github.com/PyAV-Org/PyAV/pull/1249
             # 兼容 PyAV 新旧版本，优先用 side_data_objects
             if hasattr(video_stream, "side_data_objects"):
+                # 遍历视频流的 side_data_objects
                 for side_data in video_stream.side_data_objects:
+                    # 如果 side_data 的类型为 displaymatrix
                     if getattr(side_data, "type", None) == "displaymatrix":
                         # 新版 PyAV 有 to_degrees 方法
                         to_degrees = getattr(side_data, "to_degrees", None)
                         if callable(to_degrees):
+                            # 获取旋转角度
                             rotation_deg = side_data.to_degrees()
                         else:
                             # 兼容性兜底
                             rotation_deg = 0
             # 兼容极老版本 PyAV
             elif hasattr(video_stream, "side_data"):
+                # 获取旋转角度
                 rotation_deg = video_stream.side_data.get("DISPLAYMATRIX", 0)
             else:
+                # 默认旋转角度为0
                 rotation_deg = 0
 
+            # 获取视频帧数
             num_video_frames = video_stream.frames
+            # 获取视频开始时间
             video_start_time = float(video_stream.start_time * video_stream.time_base)
+            # 获取视频流的宽、高
             width, height = video_stream.width, video_stream.height
+            # 获取视频流的帧率
             fps = float(video_stream.guessed_rate)
             fps_avg = video_stream.average_rate
+            # 如果视频流有时长
             if video_stream.duration is not None:
+                # 获取视频时长
                 video_duration_sec = float(
                     video_stream.duration * video_stream.time_base
                 )
+            # 如果帧率为空
             if fps is None:
+                # 使用平均帧率
                 fps = float(fps_avg)
 
+            # 如果旋转角度不为空且为90、-90、270、-270
             if not math.isnan(rotation_deg) and int(rotation_deg) in (
                 90,
                 -90,
                 270,
                 -270,
             ):
+                # 交换宽、高
                 width, height = height, width
 
+        # 获取视频时长
         duration_sec = max(container_duration_sec, video_duration_sec)
 
+        # 返回视频元数据
         return VideoMetadata(
             duration_sec=duration_sec,
             container_duration_sec=container_duration_sec,

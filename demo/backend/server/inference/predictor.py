@@ -45,9 +45,11 @@ class InferenceAPI:
     def __init__(self) -> None:
         super(InferenceAPI, self).__init__()
 
+        # 初始化会话状态字典
         self.session_states: Dict[str, Any] = {}
         self.score_thresh = 0
 
+        # 根据模型大小选择模型路径和配置文件
         if MODEL_SIZE == "tiny":
             checkpoint = Path(APP_ROOT) / "checkpoints/sam2.1_hiera_tiny.pt"
             model_cfg = "configs/sam2.1/sam2.1_hiera_t.yaml"
@@ -62,22 +64,28 @@ class InferenceAPI:
             model_cfg = "configs/sam2.1/sam2.1_hiera_b+.yaml"
 
         # select the device for computation
+        # 获取环境变量，如果为1，则强制使用CPU设备
         force_cpu_device = os.environ.get("SAM2_DEMO_FORCE_CPU_DEVICE", "0") == "1"
         if force_cpu_device:
             logger.info("forcing CPU device for SAM 2 demo")
+        # 如果CUDA可用且未强制使用CPU设备，则使用CUDA设备
         if torch.cuda.is_available() and not force_cpu_device:
             device = torch.device("cuda")
+        # 如果MPS可用且未强制使用CPU设备，则使用MPS设备
         elif torch.backends.mps.is_available() and not force_cpu_device:
             device = torch.device("mps")
+        # 否则使用CPU设备
         else:
             device = torch.device("cpu")
         logger.info(f"using device: {device}")
 
+        # 如果使用CUDA设备，则开启tfloat32
         if device.type == "cuda":
             # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
             if torch.cuda.get_device_properties(0).major >= 8:
                 torch.backends.cuda.matmul.allow_tf32 = True
                 torch.backends.cudnn.allow_tf32 = True
+        # 如果使用MPS设备，则发出警告
         elif device.type == "mps":
             logging.warning(
                 "\nSupport for MPS devices is preliminary. SAM 2 is trained with CUDA and might "
@@ -85,10 +93,13 @@ class InferenceAPI:
                 "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
             )
 
+        # 设置设备
         self.device = device
+        # 构建SAM2视频预测器
         self.predictor = build_sam2_video_predictor(
             model_cfg, checkpoint, device=device
         )
+        # 创建锁
         self.inference_lock = Lock()
 
     def autocast_context(self):
@@ -98,7 +109,9 @@ class InferenceAPI:
             return contextlib.nullcontext()
 
     def start_session(self, request: StartSessionRequest) -> StartSessionResponse:
+        # 使用上下文管理器自动释放资源
         with self.autocast_context(), self.inference_lock:
+            # 生成一个随机的session_id
             session_id = str(uuid.uuid4())
             # for MPS devices, we offload the video frames to CPU by default to avoid
             # memory fragmentation in MPS (which sometimes crashes the entire process)
@@ -120,10 +133,14 @@ class InferenceAPI:
     def add_points(
         self, request: AddPointsRequest, test: str = ""
     ) -> PropagateDataResponse:
+        # 使用autocast_context和inference_lock上下文管理器
         with self.autocast_context(), self.inference_lock:
+            # 获取session
             session = self.__get_session(request.session_id)
+            # 获取inference_state
             inference_state = session["state"]
 
+            # 获取request中的frame_index、object_id、points、labels、clear_old_points
             frame_idx = request.frame_index
             obj_id = request.object_id
             points = request.points
@@ -159,6 +176,7 @@ class InferenceAPI:
         Note: providing an input mask would overwrite any previous input points on this frame.
         """
         with self.autocast_context(), self.inference_lock:
+            # 获取请求中的session_id、frame_index、object_id和rle_mask
             session_id = request.session_id
             frame_idx = request.frame_index
             obj_id = request.object_id
@@ -167,26 +185,34 @@ class InferenceAPI:
                 "size": request.mask.size,
             }
 
+            # 将rle_mask解码为numpy数组
             mask = decode_masks(rle_mask)
 
+            # 记录日志
             logger.info(
                 f"add mask on frame {frame_idx} in session {session_id}: {obj_id=}, {mask.shape=}"
             )
+            # 获取session
             session = self.__get_session(session_id)
+            # 获取inference_state
             inference_state = session["state"]
 
+            # 调用model的add_new_mask方法，添加新的mask
             frame_idx, obj_ids, video_res_masks = self.model.add_new_mask(
                 inference_state=inference_state,
                 frame_idx=frame_idx,
                 obj_id=obj_id,
                 mask=torch.tensor(mask > 0),
             )
+            # 将video_res_masks转换为二进制
             masks_binary = (video_res_masks > self.score_thresh)[:, 0].cpu().numpy()
 
+            # 获取rle_mask_list
             rle_mask_list = self.__get_rle_mask_list(
                 object_ids=obj_ids, masks=masks_binary
             )
 
+            # 返回PropagateDataResponse
             return PropagateDataResponse(
                 frame_index=frame_idx,
                 results=rle_mask_list,
@@ -270,6 +296,7 @@ class InferenceAPI:
     def propagate_in_video(
         self, request: PropagateInVideoRequest
     ) -> Generator[PropagateDataResponse, None, None]:
+        # 获取请求中的session_id、start_frame_idx、propagation_direction和max_frame_num_to_track
         session_id = request.session_id
         start_frame_idx = request.start_frame_index
         propagation_direction = "both"
@@ -283,16 +310,20 @@ class InferenceAPI:
         # in caller to this method to ensure that it's called under the correct context
         # (we've added `autocast_context` to `gen_track_with_mask_stream` in app.py).
         with self.autocast_context(), self.inference_lock:
+            # 记录日志
             logger.info(
                 f"propagate in video in session {session_id}: "
                 f"{propagation_direction=}, {start_frame_idx=}, {max_frame_num_to_track=}"
             )
 
             try:
+                # 获取session
                 session = self.__get_session(session_id)
                 session["canceled"] = False
 
+                # 获取inference_state
                 inference_state = session["state"]
+                # 检查propagation_direction是否合法
                 if propagation_direction not in ["both", "forward", "backward"]:
                     raise ValueError(
                         f"invalid propagation direction: {propagation_direction}"
@@ -300,6 +331,7 @@ class InferenceAPI:
 
                 # First doing the forward propagation
                 if propagation_direction in ["both", "forward"]:
+                    # 进行前向传播
                     for outputs in self.predictor.propagate_in_video(
                         inference_state=inference_state,
                         start_frame_idx=start_frame_idx,
@@ -309,15 +341,19 @@ class InferenceAPI:
                         if session["canceled"]:
                             return None
 
+                        # 获取frame_idx、obj_ids和video_res_masks
                         frame_idx, obj_ids, video_res_masks = outputs
+                        # 将video_res_masks转换为二进制
                         masks_binary = (
                             (video_res_masks > self.score_thresh)[:, 0].cpu().numpy()
                         )
 
+                        # 获取rle_mask_list
                         rle_mask_list = self.__get_rle_mask_list(
                             object_ids=obj_ids, masks=masks_binary
                         )
 
+                        # 生成PropagateDataResponse
                         yield PropagateDataResponse(
                             frame_index=frame_idx,
                             results=rle_mask_list,
@@ -325,6 +361,7 @@ class InferenceAPI:
 
                 # Then doing the backward propagation (reverse in time)
                 if propagation_direction in ["both", "backward"]:
+                    # 进行反向传播
                     for outputs in self.predictor.propagate_in_video(
                         inference_state=inference_state,
                         start_frame_idx=start_frame_idx,
@@ -334,15 +371,19 @@ class InferenceAPI:
                         if session["canceled"]:
                             return None
 
+                        # 获取frame_idx、obj_ids和video_res_masks
                         frame_idx, obj_ids, video_res_masks = outputs
+                        # 将video_res_masks转换为二进制
                         masks_binary = (
                             (video_res_masks > self.score_thresh)[:, 0].cpu().numpy()
                         )
 
+                        # 获取rle_mask_list
                         rle_mask_list = self.__get_rle_mask_list(
                             object_ids=obj_ids, masks=masks_binary
                         )
 
+                        # 生成PropagateDataResponse
                         yield PropagateDataResponse(
                             frame_index=frame_idx,
                             results=rle_mask_list,
@@ -350,6 +391,7 @@ class InferenceAPI:
             finally:
                 # Log upon completion (so that e.g. we can see if two propagations happen in parallel).
                 # Using `finally` here to log even when the tracking is aborted with GeneratorExit.
+                # 记录日志
                 logger.info(
                     f"propagation ended in session {session_id}; {self.__get_session_stats()}"
                 )
