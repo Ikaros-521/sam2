@@ -126,7 +126,7 @@ Options for the `MODEL_SIZE` argument are "tiny", "small", "base_plus" (default)
 
 If you wish to run the frontend separately (useful for development), follow these steps:
 
-前端打包后可以正常使用
+前端打包后可以正常使用 `npm run build`  
 
 1. **Navigate to demo frontend directory:**
 

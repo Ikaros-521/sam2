@@ -10,3 +10,5 @@ outputs/*
 checkpoints/*.pt
 demo/backend/checkpoints/*.pt
 .history
+.env
+demo/backend/server/checkpoints

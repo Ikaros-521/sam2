@@ -6,3 +6,6 @@ flask
 flask_cors
 pycocotools
 decord
+
+dotenv
+opencv-python
