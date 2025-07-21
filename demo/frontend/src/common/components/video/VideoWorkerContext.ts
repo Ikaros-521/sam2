@@ -727,8 +727,13 @@ export default class VideoWorkerContext {
     }
   }
 
+  // 绘制水印
   private _drawWatermark(form: CanvasForm, frameBitmap: ImageBitmap): void {
+    return;
+
+    // 获取画布宽度
     const frameWidth = this._canvas?.width || frameBitmap.width;
+    // 获取画布高度
     const frameHeight = this._canvas?.height || frameBitmap.height;
     // Font size is either 12 or smaller based on available width
     // since the font is not monospaced, we approximate it'll fit 1.5 more characters than monospaced
