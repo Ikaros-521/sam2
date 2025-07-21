@@ -51,6 +51,7 @@ export function encode(
           });
         }
         const shiftedDuration = durations.shift();
+        console.log('shiftedDuration:', shiftedDuration);
         if (shiftedDuration != null) {
           outputFile.addSample(trackID, uint8, {
             duration: getScaledDuration(shiftedDuration),
@@ -60,7 +61,11 @@ export function encode(
           progressCallback?.(encodedFrameIndex / numFrames);
         }
 
+        console.log(outputFile);
+
         if (encodedFrameIndex === numFrames) {
+          // 修复：确保 mp4box.js 写入 moov box，包含 duration 信息
+          if (typeof outputFile.flush === 'function') outputFile.flush();
           resolve(outputFile.getBuffer());
         }
       },
