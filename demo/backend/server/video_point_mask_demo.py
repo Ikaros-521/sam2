@@ -8,7 +8,8 @@ from inference.data_types import AddPointsRequest, StartSessionRequest, Propagat
 from pycocotools.mask import decode as decode_mask
 
 # ========== 配置 ===========
-VIDEO_PATH = '../../data/gallery/05_default_juggle.mp4'  # 替换为你的视频路径
+# VIDEO_PATH = '../../data/gallery/1080p.mp4'  # 替换为你的视频路径
+VIDEO_PATH = '../../data/gallery/05_default_juggle.mp4'
 OBJECT_ID = 1
 
 # ========== 初始化API和Session ===========
@@ -101,15 +102,21 @@ while True:
         exit()
 cv2.destroyAllWindows()
 
-# ========== 遮罩确认后，propagate全视频追踪 ===========
-print('正在进行全视频追踪，请稍候...')
+# ========== 遮罩确认后，propagate全视频追踪并实时显示 ==========
+print('正在进行全视频追踪并实时显示...')
 request = PropagateInVideoRequest(
     type='propagate_in_video',
     session_id=session_id,
     start_frame_index=0
 )
-mask_dict = {}  # frame_idx -> 合并后的mask
+cap = cv2.VideoCapture(VIDEO_PATH)
+frame_count = 0
+start_time = time.time()
+
 for response in api.propagate_in_video(request):
+    ret, frame = cap.read()
+    if not ret:
+        break
     # 合并所有目标体的mask
     mask_sum = np.zeros(frame.shape[:2], dtype=np.uint8)
     for r in response.results:
@@ -121,19 +128,7 @@ for response in api.propagate_in_video(request):
         if m.ndim == 3:
             m = m[:, :, 0]
         mask_sum = np.logical_or(mask_sum, m)
-    mask_dict[response.frame_index] = mask_sum.astype(np.uint8)
-print('追踪完成，开始播放...')
-
-# ========== 播放追踪结果 ==========
-cap = cv2.VideoCapture(VIDEO_PATH)
-frame_idx = 0
-frame_count = 0
-start_time = time.time()
-while True:
-    ret, frame = cap.read()
-    if not ret or frame_idx not in mask_dict:
-        break
-    mask = mask_dict[frame_idx]
+    mask = mask_sum.astype(np.uint8)
     masked = np.zeros_like(frame)
     masked[mask > 0] = frame[mask > 0]  # 只保留遮罩内容
     frame_count += 1
@@ -143,6 +138,6 @@ while True:
     cv2.imshow('masked', masked)
     if cv2.waitKey(1) == 27:
         break
-    frame_idx += 1
+
 cap.release()
 cv2.destroyAllWindows() 
