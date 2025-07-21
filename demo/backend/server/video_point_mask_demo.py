@@ -1,3 +1,4 @@
+import argparse
 # pip install opencv-python
 import cv2
 import numpy as np
@@ -7,10 +8,23 @@ from inference.predictor import InferenceAPI
 from inference.data_types import AddPointsRequest, StartSessionRequest, PropagateInVideoRequest
 from pycocotools.mask import decode as decode_mask
 
-# ========== 配置 ===========
-# VIDEO_PATH = '../../data/gallery/1080p.mp4'  # 替换为你的视频路径
-VIDEO_PATH = '../../data/gallery/05_default_juggle.mp4'
+# ========== 命令行参数 ===========
+parser = argparse.ArgumentParser(description='视频打点遮罩追踪Demo')
+parser.add_argument('--video_path', type=str, default='../../data/gallery/05_default_juggle.mp4', help='视频路径')
+parser.add_argument('--keep', type=str, choices=['foreground', 'background'], default='foreground', help='保留前景还是背景')
+parser.add_argument('--green_screen', action='store_true', help='扣完转绿幕')
+parser.add_argument('--save_output', action='store_true', help='是否保存输出视频')
+parser.add_argument('--output_path', type=str, default='output_masked.mp4', help='输出视频路径')
+parser.add_argument('--no_fps', action='store_true', help='不在画面上显示FPS（默认显示）')
+args = parser.parse_args()
+
+VIDEO_PATH = args.video_path
 OBJECT_ID = 1
+KEEP_FOREGROUND = args.keep == 'foreground'
+GREEN_SCREEN = args.green_screen
+SAVE_OUTPUT = args.save_output
+OUTPUT_PATH = args.output_path
+NO_FPS = args.no_fps
 
 # ========== 初始化API和Session ===========
 api = InferenceAPI()
@@ -102,18 +116,26 @@ while True:
         exit()
 cv2.destroyAllWindows()
 
-# ========== 遮罩确认后，propagate全视频追踪并实时显示 ==========
+# ========== 遮罩确认后，propagate全视频追踪并实时显示 ========== 
 print('正在进行全视频追踪并实时显示...')
-request = PropagateInVideoRequest(
-    type='propagate_in_video',
-    session_id=session_id,
-    start_frame_index=0
-)
 cap = cv2.VideoCapture(VIDEO_PATH)
 frame_count = 0
 start_time = time.time()
 
-for response in api.propagate_in_video(request):
+# 视频保存相关
+out_writer = None
+if SAVE_OUTPUT:
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    out_writer = cv2.VideoWriter(OUTPUT_PATH, fourcc, fps, (width, height))
+
+for response in api.propagate_in_video(PropagateInVideoRequest(
+    type='propagate_in_video',
+    session_id=session_id,
+    start_frame_index=0
+)):
     ret, frame = cap.read()
     if not ret:
         break
@@ -129,15 +151,36 @@ for response in api.propagate_in_video(request):
             m = m[:, :, 0]
         mask_sum = np.logical_or(mask_sum, m)
     mask = mask_sum.astype(np.uint8)
-    masked = np.zeros_like(frame)
-    masked[mask > 0] = frame[mask > 0]  # 只保留遮罩内容
+
+    # 保留前景还是背景
+    if KEEP_FOREGROUND:
+        show_mask = mask > 0
+    else:
+        show_mask = mask == 0
+
+    # 绿幕处理
+    if GREEN_SCREEN:
+        masked = frame.copy()
+        if KEEP_FOREGROUND:
+            masked[~show_mask] = (0, 255, 0)
+        else:
+            masked[~show_mask] = (0, 255, 0)
+    else:
+        masked = np.zeros_like(frame)
+        masked[show_mask] = frame[show_mask]
+
     frame_count += 1
     elapsed = time.time() - start_time
     fps = frame_count / elapsed if elapsed > 0 else 0
-    cv2.putText(masked, f'FPS: {fps:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+    if not NO_FPS:
+        cv2.putText(masked, f'FPS: {fps:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
     cv2.imshow('masked', masked)
+    if SAVE_OUTPUT and out_writer is not None:
+        out_writer.write(masked)
     if cv2.waitKey(1) == 27:
         break
 
 cap.release()
+if out_writer is not None:
+    out_writer.release()
 cv2.destroyAllWindows() 
