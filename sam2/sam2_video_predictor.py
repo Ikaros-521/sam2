@@ -1081,6 +1081,7 @@ class SAM2VideoPredictorVOS(SAM2VideoPredictor):
             # a learned `no_mask_embed` to indicate no mask input in this case).
             sam_mask_prompt = None
 
+        # c) Encode the prompts
         sparse_embeddings, dense_embeddings = self.sam_prompt_encoder(
             points=(sam_point_coords, sam_point_labels),
             boxes=None,
