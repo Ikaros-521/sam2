@@ -29,28 +29,28 @@ export default defineConfig({
     // port: 8080, // 指定端口
     proxy: {
       '/graphql': {
-        target: 'http://117.50.46.27:7263',
+        target: 'http://117.50.178.209:7263',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/graphql/, '/graphql'),
       },
       '/propagate_in_video': {
-        target: 'http://117.50.46.27:7263',
+        target: 'http://117.50.178.209:7263',
         changeOrigin: true,
         secure: false,
       },
       '/uploads': {
-        target: 'http://117.50.46.27:7263',
+        target: 'http://117.50.178.209:7263',
         changeOrigin: true,
         secure: false,
       },
       '/gallery': {
-        target: 'http://117.50.46.27:7263',
+        target: 'http://117.50.178.209:7263',
         changeOrigin: true,
         secure: false,
       },
       '/posters': {
-        target: 'http://117.50.46.27:7263',
+        target: 'http://117.50.178.209:7263',
         changeOrigin: true,
         secure: false,
       },
