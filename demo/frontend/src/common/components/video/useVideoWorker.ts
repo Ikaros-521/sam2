@@ -40,8 +40,10 @@ export default function useVideoWorker(
   options: Options = {},
 ) {
   const isControlTransferredToOffscreenRef = useRef(false);
+  const lastSrcRef = useRef<string | null>(null);
 
   const mergedOptions = useMemo(() => {
+    // console.log(`[useVideoWorker] 重新计算mergedOptions`, options);
     const definedProps = (o: Options) =>
       Object.fromEntries(
         Object.entries(o).filter(([_k, v]) => v !== undefined),
@@ -50,14 +52,15 @@ export default function useVideoWorker(
       DEFAULT_OPTIONS,
       definedProps(options),
     ) as Required<Options>;
-  }, [options]);
+  }, [options.createVideoWorker, options.createWorkerBridge]);
 
   const worker = useMemo(() => {
+    // console.log(`[useVideoWorker] 创建新的worker实例`);
     if (mergedOptions.createWorkerBridge) {
       return mergedOptions.createWorkerBridge(mergedOptions.createVideoWorker);
     }
     return VideoWorkerBridge.create(mergedOptions.createVideoWorker);
-  }, [mergedOptions]);
+  }, [mergedOptions.createWorkerBridge, mergedOptions.createVideoWorker]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -72,15 +75,24 @@ export default function useVideoWorker(
 
     isControlTransferredToOffscreenRef.current = true;
 
+    // console.log(`[useVideoWorker] 设置canvas`);
     worker.setCanvas(canvas);
 
     return () => {
       // Cannot terminate worker in DEV mode
       // workerRef.current?.terminate();
     };
-  }, [canvasRef, mergedOptions, worker]);
+  }, [canvasRef, worker]);
 
   useEffect(() => {
+    // 防止重复调用相同的src
+    if (lastSrcRef.current === src) {
+      console.log(`[useVideoWorker] 跳过重复的setSource调用: ${src}`);
+      return;
+    }
+    
+    console.log(`[useVideoWorker] 调用setSource: ${src}`);
+    lastSrcRef.current = src;
     worker.setSource(src);
   }, [src, worker]);
 
