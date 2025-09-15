@@ -28,11 +28,15 @@ export function encode(
   framesGenerator: AsyncGenerator<ImageFrame, unknown>,
   progressCallback?: (progress: number) => void,
 ): Promise<MP4ArrayBuffer> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let encodedFrameIndex = 0;
     let nextKeyFrameTimestamp = 0;
     let trackID: number | null = null;
     const durations: number[] = [];
+    let totalDuration = 0; // 添加总时长跟踪
+    let trackCreated = false; // 标记轨道是否已创建
+    let firstTimestamp = 0;
+    let isFirstFrame = true;
 
     const outputFile = createFile();
 
@@ -42,17 +46,21 @@ export function encode(
         chunk.copyTo(uint8);
 
         const description = metaData?.decoderConfig?.description;
-        if (trackID === null) {
+        if (!trackCreated) {
+          // 使用估算的duration创建轨道，后续会通过样本duration自动计算
+          console.log(`[VideoEncoder] 创建轨道，使用估算时长`);
+          
           trackID = outputFile.addTrack({
             width: width,
             height: height,
             timescale: TIMESCALE,
             avcDecoderConfigRecord: description,
           });
+          trackCreated = true;
         }
         const shiftedDuration = durations.shift();
         console.log('shiftedDuration:', shiftedDuration);
-        if (shiftedDuration != null) {
+        if (shiftedDuration != null && trackID !== null) {
           outputFile.addSample(trackID, uint8, {
             duration: getScaledDuration(shiftedDuration),
             is_sync: chunk.type === 'key',
@@ -64,9 +72,15 @@ export function encode(
         console.log(outputFile);
 
         if (encodedFrameIndex === numFrames) {
+          console.log(`[VideoEncoder] 编码完成，总时长: ${totalDuration}微秒 (${totalDuration/1_000_000}秒)`);
+          
           // 修复：确保 mp4box.js 写入 moov box，包含 duration 信息
           if (typeof outputFile.flush === 'function') outputFile.flush();
-          resolve(outputFile.getBuffer());
+          
+          // 获取最终的MP4缓冲区
+          const buffer = outputFile.getBuffer();
+          console.log(`[VideoEncoder] 生成的MP4文件大小: ${buffer.byteLength} 字节`);
+          resolve(buffer);
         }
       },
       error(error) {
@@ -110,12 +124,23 @@ export function encode(
 
       for await (const frame of framesGenerator) {
         const {bitmap, duration, timestamp} = frame;
+        
+        // 规范化时间戳，确保从0开始
+        let normalizedTimestamp = timestamp;
+        if (isFirstFrame) {
+          firstTimestamp = timestamp;
+          isFirstFrame = false;
+        }
+        normalizedTimestamp = timestamp - firstTimestamp;
+        
         durations.push(duration);
+        totalDuration += duration; // 累加总时长
+        
         let keyFrame = false;
-        if (timestamp >= nextKeyFrameTimestamp) {
+        if (normalizedTimestamp >= nextKeyFrameTimestamp) {
           await encoder.flush();
           keyFrame = true;
-          nextKeyFrameTimestamp = timestamp + SECONDS_PER_KEY_FRAME * 1e6;
+          nextKeyFrameTimestamp = normalizedTimestamp + SECONDS_PER_KEY_FRAME * 1e6;
         }
         encoder.encode(bitmap, {keyFrame});
         bitmap.close();
