@@ -47,6 +47,45 @@ def healthy() -> Response:
     return make_response("OK", 200)
 
 
+# 定义清理缓存的路由
+@app.route("/cleanup_cache", methods=["POST"])
+def cleanup_cache() -> Response:
+    """清理所有会话的缓存，释放GPU内存"""
+    try:
+        # 获取内存使用统计（清理前）
+        stats_before = inference_api.get_memory_usage_stats()
+        
+        # 清理所有会话的缓存
+        inference_api.cleanup_all_sessions_cache()
+        
+        # 获取内存使用统计（清理后）
+        stats_after = inference_api.get_memory_usage_stats()
+        
+        response_data = {
+            "success": True,
+            "message": "缓存清理完成",
+            "stats_before": stats_before,
+            "stats_after": stats_after
+        }
+        
+        return make_response(response_data, 200)
+    except Exception as e:
+        logger.error(f"Error during cache cleanup: {e}")
+        return make_response({"success": False, "error": str(e)}, 500)
+
+
+# 定义获取内存使用统计的路由
+@app.route("/memory_stats", methods=["GET"])
+def memory_stats() -> Response:
+    """获取内存使用统计信息"""
+    try:
+        stats = inference_api.get_memory_usage_stats()
+        return make_response(stats, 200)
+    except Exception as e:
+        logger.error(f"Error getting memory stats: {e}")
+        return make_response({"error": str(e)}, 500)
+
+
 # 定义发送画廊视频的路由
 @app.route(f"/{GALLERY_PREFIX}/<path:path>", methods=["GET"])
 def send_gallery_video(path: str) -> Response:
