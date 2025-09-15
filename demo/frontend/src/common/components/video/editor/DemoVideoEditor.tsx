@@ -264,8 +264,8 @@ export default function DemoVideoEditor({video: inputVideo}: Props) {
       {(isVideoLoading || session === null) && !isSessionStartFailed && (
         <div {...stylex.props(styles.loadingScreenWrapper)}>
           <LoadingStateScreen
-            title="Loading demo..."
-            description="This may take a few moments, you're almost there!"
+            title="加载Demo中..."
+            description="这可能需要几分钟，快到了！"
           />
         </div>
       )}
@@ -283,8 +283,8 @@ export default function DemoVideoEditor({video: inputVideo}: Props) {
       {isMobile && renderingError != null && (
         <div {...stylex.props(styles.loadingScreenWrapper)}>
           <LoadingStateScreen
-            title="Well, this is embarrassing..."
-            description="This demo is not optimized for your device. Please try again on a different device with a larger screen."
+            title="好吧，这太尴尬了..."
+            description="此演示未针对您的设备进行优化。请在屏幕更大的其他设备上重试。"
             linkProps={{to: '..', label: 'Back to homepage'}}
           />
         </div>

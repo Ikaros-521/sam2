@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # 创建Flask应用
 app = Flask(__name__)
 # 创建CORS对象，允许跨域请求
-cors = CORS(app, supports_credentials=True, origins="*")
+cors = CORS(app, origins="*")
 
 # 预加载数据
 videos = preload_data()

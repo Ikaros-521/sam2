@@ -19,8 +19,8 @@ import {FallbackProps} from 'react-error-boundary';
 export default function DemoErrorFallback(_props: FallbackProps) {
   return (
     <LoadingStateScreen
-      title="Well, this is embarrassing..."
-      description="This demo is not optimized for your device. Please try again on a different device with a larger screen."
+      title="好吧，这太尴尬了..."
+      description="此演示未针对您的设备进行优化。请在屏幕更大的其他设备上重试。"
       linkProps={{to: '..', label: 'Back to homepage'}}
     />
   );
