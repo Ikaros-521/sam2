@@ -25,17 +25,17 @@ export default function ObjectsToolbarHeader() {
     <ToolbarHeaderWrapper
       title={
         streamingState === 'full'
-          ? 'Review tracked objects'
+          ? '查看跟踪对象'
           : isStreaming
-            ? 'Tracking objects'
-            : 'Select objects'
+            ? '正在跟踪对象'
+            : '选择对象'
       }
       description={
         streamingState === 'full'
-          ? 'Review your selected objects across the video, and continue to edit if needed. Once everything looks good, press “Next” to continue.'
+          ? '查看视频中选定的对象，如有需要可继续编辑。一切就绪后，点击"下一步"继续。'
           : isStreaming
-            ? 'Watch the video closely for any places where your objects aren’t tracked correctly. You can also stop tracking to make additional edits.'
-            : 'Adjust the selection of your object, or add additional objects. Press “Track objects” to track your objects throughout the video.'
+            ? '仔细观察视频，查看对象跟踪不正确的地方。您也可以停止跟踪以进行额外编辑。'
+            : '调整对象的选择，或添加其他对象。点击"跟踪对象"来跟踪整个视频中的对象。'
       }
       className="mb-8"
     />

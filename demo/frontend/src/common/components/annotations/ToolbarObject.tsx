@@ -58,8 +58,8 @@ export default function ToolbarObject({
       <ToolbarObjectContainer
         alignItems="center"
         isActive={isActive}
-        title="New object"
-        subtitle="No object is currently selected. Click an object in the video."
+        title="新对象"
+        subtitle="当前没有选择对象。点击视频中的对象。"
         thumbnail={<ObjectPlaceholder showPlus={false} />}
         isMobile={isMobile}
         onClick={onClick}

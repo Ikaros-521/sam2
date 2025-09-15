@@ -26,7 +26,7 @@ export default function DefaultVideoGalleryModalTrigger({
       className="hover:!bg-black"
       startIcon={<ImageCopy size={20} />}
       onClick={onClick}>
-      Change video
+      更换视频
     </ResponsiveButton>
   );
 }

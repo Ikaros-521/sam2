@@ -25,7 +25,7 @@ const ACCEPT_VIDEOS = {
   'video/quicktime': ['.mov'],
 };
 
-// 70 MB default max video upload size
+// 70 MB default max video upload size 如果需要修改，请修改后端代码
 const MAX_FILE_SIZE_IN_MB = 70;
 const MAX_VIDEO_UPLOAD_SIZE = MAX_FILE_SIZE_IN_MB * 1024 ** 2;
 
@@ -74,18 +74,18 @@ export default function useUploadVideo({
         const code = fileRejections[0].errors[0].code;
         if (code === 'file-too-large') {
           setError(
-            `File too large. Try a video under ${MAX_FILE_SIZE_IN_MB} MB`,
+            `文件过大。请尝试上传小于 ${MAX_FILE_SIZE_IN_MB} MB 的视频`,
           );
           return;
         }
       }
 
       if (acceptedFiles.length === 0) {
-        setError('File not accepted. Please try again.');
+        setError('文件不被接受。请重试。');
         return;
       }
       if (acceptedFiles.length > 1) {
-        setError('Too many files. Please try again with 1 file.');
+        setError('文件过多。请只上传1个文件。');
         return;
       }
 
@@ -103,13 +103,13 @@ export default function useUploadVideo({
         onError: error => {
           Logger.error(error);
           onUploadError?.(error);
-          setError('Upload failed.');
+          setError('上传失败。');
         },
       });
     },
     onError: error => {
       Logger.error(error);
-      setError('File not supported.');
+      setError('不支持的文件格式。');
     },
     maxSize: MAX_VIDEO_UPLOAD_SIZE,
   });

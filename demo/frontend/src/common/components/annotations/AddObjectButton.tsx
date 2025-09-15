@@ -42,7 +42,7 @@ export default function AddObjectButton() {
         <div className=" group-hover:bg-graydark-700 border border-white relative h-12 w-12 md:w-20 md:h-20 shrink-0 rounded-lg flex items-center justify-center">
           <Add size={36} className="group-hover:text-white text-gray-300" />
         </div>
-        <div className="font-medium text-base">Add another object</div>
+        <div className="font-medium text-base">添加另一个对象</div>
       </div>
     </div>
   );

@@ -20,8 +20,8 @@ export default function DemoErrorFallback(_props: FallbackProps) {
   return (
     <LoadingStateScreen
       title="好吧，这太尴尬了..."
-      description="此演示未针对您的设备进行优化。请在屏幕更大的其他设备上重试。"
-      linkProps={{to: '..', label: 'Back to homepage'}}
+      description="此演示未针对您的设备进行优化。请在屏幕更大的其他设备上重试。后端连接可能异常，请打开F12排查。"
+      linkProps={{to: '..', label: '返回首页'}}
     />
   );
 }

@@ -162,7 +162,7 @@ function decodeInternal(
             Logger.debug(`[VideoDecoder] 添加帧 ${frame_n + 1} 到图像帧数组，当前总帧数: ${imageFrames.length}`);
             // 每帧都报告进度（仅控制台），让用户看到解码正在进行
             if (frame_n % 10 === 0 || frame_n < 20) {
-              console.log(`[VideoDecoder] 解码进度: ${frame_n + 1}/${saveTrack.nb_samples} 帧 (${((frame_n + 1) / saveTrack.nb_samples * 100).toFixed(1)}%)`);
+              // console.log(`[VideoDecoder] 解码进度: ${frame_n + 1}/${saveTrack.nb_samples} 帧 (${((frame_n + 1) / saveTrack.nb_samples * 100).toFixed(1)}%)`);
             }
             
             // Sort frames in order of timestamp. This is needed because Safari
@@ -170,8 +170,8 @@ function decodeInternal(
             imageFrames.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
             // Update progress on first frame and then every 5th frame for better responsiveness
             if (onProgress != null && (frame_n === 0 || frame_n % 5 === 0)) {
-              Logger.info(`[VideoDecoder] 报告进度: ${imageFrames.length}/${saveTrack.nb_samples} 帧已解码`);
-              console.log(`[VideoDecoder] 报告进度: ${imageFrames.length}/${saveTrack.nb_samples} 帧已解码`);
+              // Logger.info(`[VideoDecoder] 报告进度: ${imageFrames.length}/${saveTrack.nb_samples} 帧已解码`);
+              // console.log(`[VideoDecoder] 报告进度: ${imageFrames.length}/${saveTrack.nb_samples} 帧已解码`);
               onProgress({
                 width: saveTrack.track_width,
                 height: saveTrack.track_height,
@@ -219,7 +219,7 @@ function decodeInternal(
             resolve(result);
           } else {
             // 检查解码器状态
-            console.log(`[VideoDecoder] 解码器状态: ${decoder.state}, 已解码: ${frame_n}/${saveTrack.nb_samples}`);
+            // console.log(`[VideoDecoder] 解码器状态: ${decoder.state}, 已解码: ${frame_n}/${saveTrack.nb_samples}`);
           }
         },
         error(error) {
@@ -347,7 +347,7 @@ export function decodeStream(
       let partCount = 0;
       while (part.done === false) {
         partCount++;
-        console.log(`[VideoDecoder] 处理流数据部分 ${partCount}, 范围: ${part.value.range.start}-${part.value.range.end}, 数据大小: ${part.value.data.length}`);
+        // console.log(`[VideoDecoder] 处理流数据部分 ${partCount}, 范围: ${part.value.range.start}-${part.value.range.end}, 数据大小: ${part.value.data.length}`);
         const result = part.value.data.buffer as MP4ArrayBuffer;
         if (result != null) {
           result.fileStart = part.value.range.start;

@@ -272,9 +272,9 @@ export default function DemoVideoEditor({video: inputVideo}: Props) {
       {isSessionStartFailed && (
         <div {...stylex.props(styles.loadingScreenWrapper)}>
           <LoadingStateScreen
-            title="Did we just break the internet?"
+            title="我们刚刚破坏了互联网吗？"
             description={
-              <>Uh oh, it looks like there was an issue starting a session.</>
+              <>啊哦，看起来在开始会话时出现了问题。</>
             }
             linkProps={{to: '..', label: 'Back to homepage'}}
           />
@@ -284,7 +284,7 @@ export default function DemoVideoEditor({video: inputVideo}: Props) {
         <div {...stylex.props(styles.loadingScreenWrapper)}>
           <LoadingStateScreen
             title="好吧，这太尴尬了..."
-            description="此演示未针对您的设备进行优化。请在屏幕更大的其他设备上重试。"
+            description="此演示未针对您的设备进行优化。请在屏幕更大的其他设备上重试。后端连接可能异常，请打开F12排查。"
             linkProps={{to: '..', label: 'Back to homepage'}}
           />
         </div>

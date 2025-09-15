@@ -72,13 +72,13 @@ export default function MobileEffectsToolbar({onTabChange}: Props) {
             onClick={handleTogglePreset}
           />
           <EffectsCarousel
-            label="Highlights"
+            label="高亮"
             effects={activeHighlightEffectsGroup}
             activeEffect={activeHighlight.name}
             index={1}
           />
           <EffectsCarousel
-            label="Background"
+            label="背景"
             effects={backgroundEffects}
             activeEffect={activeBackground.name}
             index={0}
@@ -88,7 +88,7 @@ export default function MobileEffectsToolbar({onTabChange}: Props) {
         <div className="flex flex-col gap-6 p-6">
           <div className="text-sm text-white">
             <ToolbarProgressChip />
-            Apply visual effects to your selected objects and the background.
+            为您的选定对象和背景应用视觉效果。
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -96,14 +96,14 @@ export default function MobileEffectsToolbar({onTabChange}: Props) {
               endIcon={<MagicWandFilled size={20} />}
               className={`font-bold bg-black !rounded-full !bg-gradient-to-br ${BLUE_PINK_FILL} border-none text-white`}
               onClick={handleTogglePreset}>
-              Surprise Me
+              给我惊喜
             </Button>
             <Button
               color="ghost"
               className={`font-bold bg-black !rounded-full border-none text-white`}
               startIcon={<ListBoxes size={20} />}
               onClick={() => setShowEffectsCarousels(true)}>
-              More effects
+              更多效果
             </Button>
           </div>
         </div>

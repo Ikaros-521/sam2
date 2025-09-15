@@ -27,7 +27,7 @@ export default function BackgroundEffects() {
   const activeEffect = useAtomValue(activeBackgroundEffectAtom);
 
   return (
-    <ToolbarSection title="Background" borderBottom={false}>
+    <ToolbarSection title="背景" borderBottom={false}>
       {backgroundEffects.map(backgroundEffect => {
         return (
           <ToolbarActionIcon

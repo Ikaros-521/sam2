@@ -30,8 +30,8 @@ export default class BackgroundTextEffect extends AbstractEffect {
   ): void {
     form.image([0, 0], context.frame);
 
-    const words = ['SEGMENT', 'ANYTHING', 'WOW'];
-    const paragraph = `${DEMO_SHORT_NAME} is designed for efficient video processing with streaming inference to enable real-time, interactive applications.`;
+    const words = ['分割', '任意', '哇'];
+    const paragraph = `${DEMO_SHORT_NAME} 专为高效视频处理而设计，具有流式推理功能，可实现实时交互式应用程序。`;
     const progress = context.frameIndex / context.totalFrames;
 
     // Zooming heading

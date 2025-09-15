@@ -22,11 +22,11 @@ export default function DownloadOption() {
 
   return (
     <OptionButton
-      title="Download"
+      title="下载"
       Icon={Package}
       loadingProps={{
         loading: state === 'started' || state === 'encoding',
-        label: 'Downloading...',
+        label: '正在下载...',
       }}
       onClick={download}
     />

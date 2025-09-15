@@ -68,7 +68,7 @@ export default function PlaybackButton() {
   }, [handleClick]);
 
   return (
-    <Tooltip message={`${isPlaying ? 'Pause' : 'Play'} (k)`}>
+    <Tooltip message={`${isPlaying ? '暂停' : '播放'} (k)`}>
       <button
         disabled={isDisabled}
         className={`group !rounded-full !w-10 !h-10 flex items-center justify-center ${getButtonStyles(isDisabled)}`}

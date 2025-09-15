@@ -29,16 +29,16 @@ export default function ErrorFallback({
 
   return (
     <div className="h-full flex flex-col gap-2 items-center justify-center">
-      <p>Please check your connection and retry or report error.</p>
+      <p>请检查您的连接并重试或报告错误。</p>
       <div className="flex flex-row gap-2">
         <Button color="ghost" onClick={resetErrorBoundary}>
-          Retry
+          重试
         </Button>
         <Button
           className="text-error"
           color="ghost"
           onClick={handleReportError}>
-          Report Error
+          报告错误
         </Button>
       </div>
     </div>

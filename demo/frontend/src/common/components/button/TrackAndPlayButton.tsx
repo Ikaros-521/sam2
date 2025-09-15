@@ -117,7 +117,7 @@ export default function TrackAndPlayButton() {
       disabled={isThrottled || !areObjectsInitialized}
       onClick={handleTrackAndPlay}
       endIcon={isStreaming ? undefined : <ChevronRight size={20} />}>
-      {isStreaming ? 'Cancel Tracking' : 'Track objects'}
+      {isStreaming ? '取消跟踪' : '跟踪对象'}
     </PrimaryCTAButton>
   );
 }

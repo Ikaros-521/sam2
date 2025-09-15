@@ -78,7 +78,7 @@ export default function ApprovableInput<T extends string | number>({
               }
             }}
           />
-          <Tooltip message="Reset to default">
+          <Tooltip message="重置为默认值">
             <Button
               className="join-item"
               onClick={event => {
@@ -88,7 +88,7 @@ export default function ApprovableInput<T extends string | number>({
               <ArrowPathIcon className="h-4 w-4" />
             </Button>
           </Tooltip>
-          <Tooltip message="Revert change">
+          <Tooltip message="撤销更改">
             <Button
               className="join-item"
               color="neutral"
@@ -100,7 +100,7 @@ export default function ApprovableInput<T extends string | number>({
               <XMarkIcon className="h-4 w-4" />
             </Button>
           </Tooltip>
-          <Tooltip message="Apply change">
+          <Tooltip message="应用更改">
             <Button
               className="join-item"
               color="primary"
