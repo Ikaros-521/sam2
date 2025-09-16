@@ -6,6 +6,7 @@
 
 import os
 import sys
+import torch
 from depth_video_converter import DepthVideoConverter
 
 
