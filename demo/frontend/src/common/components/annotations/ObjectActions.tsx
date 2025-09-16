@@ -87,10 +87,10 @@ export default function ObjectActions({objectId, active}: Props) {
     <div>
       {active && (
         <div className="text-sm mt-1 leading-snug text-gray-400 hidden md:block ml-2 md:mb-4">
-          Select <AddFilled size={14} className="inline" /> to add areas to the
-          object and <SubtractFilled size={14} className="inline" /> to remove
-          areas from the object in the video. Click on an existing point to
-          delete it.
+          选择 <AddFilled size={14} className="inline" /> 来添加区域到
+          对象，选择 <SubtractFilled size={14} className="inline" /> 来从
+          视频中的对象移除区域。点击现有点来
+          删除它。
         </div>
       )}
 
@@ -100,13 +100,13 @@ export default function ObjectActions({objectId, active}: Props) {
         ) : (
           <>
             <CustomButton startIcon={<Select_02 size={24} />}>
-              Edit selection
+              编辑选择
             </CustomButton>
             <CustomButton
               loading={isRemovingObject}
               onClick={handleRemoveObject}
               startIcon={!isRemovingObject && <TrashCan size={24} />}>
-              <span className="hidden md:inline">Clear</span>
+              <span className="hidden md:inline">清除</span>
             </CustomButton>
           </>
         )}

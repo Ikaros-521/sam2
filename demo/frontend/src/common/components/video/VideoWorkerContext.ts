@@ -214,6 +214,9 @@ export default class VideoWorkerContext {
   }
 
   public setSource(src: string) {
+    Logger.info(`[VideoWorkerContext] setSource被调用: ${src}`);
+    console.log(`[VideoWorkerContext] setSource被调用: ${src}`);
+    
     this.close();
 
     // Clear state of previous source.
@@ -533,6 +536,8 @@ export default class VideoWorkerContext {
     const canvas = this._canvas;
     invariant(canvas != null, 'need canvas to render decoded video');
 
+    Logger.info(`[VideoWorkerContext] 开始解码视频: ${src}`);
+    console.log(`[VideoWorkerContext] 开始解码视频: ${src}`);
     this.sendResponse('loadstart');
 
     const fileStream = streamFile(src, {
@@ -542,6 +547,8 @@ export default class VideoWorkerContext {
 
     let renderedFirstFrame = false;
     this._decodedVideo = await decodeStream(fileStream, async progress => {
+      // Logger.info(`[VideoWorkerContext] 收到解码进度: ${progress.frames.length}/${progress.numFrames} 帧, 尺寸: ${progress.width}x${progress.height}, FPS: ${progress.fps?.toFixed(2)}`);
+      // console.log(`[VideoWorkerContext] 收到解码进度: ${progress.frames.length}/${progress.numFrames} 帧, 尺寸: ${progress.width}x${progress.height}, FPS: ${progress.fps?.toFixed(2)}`);
       const {fps, height, width, numFrames, frames} = progress;
       this._decodedVideo = progress;
       if (!renderedFirstFrame) {
@@ -595,11 +602,14 @@ export default class VideoWorkerContext {
     });
 
     if (!renderedFirstFrame) {
+      Logger.info(`[VideoWorkerContext] 视频解码完成，但未渲染第一帧，设置画布尺寸: ${this._decodedVideo.width}x${this._decodedVideo.height}`);
       canvas.width = this._decodedVideo.width;
       canvas.height = this._decodedVideo.height;
       this._drawFrame();
     }
 
+    Logger.info(`[VideoWorkerContext] 视频解码完全完成！总帧数: ${this._decodedVideo.frames.length}/${this._decodedVideo.numFrames}, 尺寸: ${this._decodedVideo.width}x${this._decodedVideo.height}, FPS: ${this._decodedVideo.fps?.toFixed(2)}`);
+    console.log(`[VideoWorkerContext] 视频解码完全完成！总帧数: ${this._decodedVideo.frames.length}/${this._decodedVideo.numFrames}, 尺寸: ${this._decodedVideo.width}x${this._decodedVideo.height}, FPS: ${this._decodedVideo.fps?.toFixed(2)}`);
     this.sendResponse<DecodeResponse>('decode', {
       totalFrames: this._decodedVideo.numFrames,
       numFrames: this._decodedVideo.frames.length,
@@ -612,7 +622,10 @@ export default class VideoWorkerContext {
 
   private _drawFrame(): void {
     if (this._canvas !== null && this._form !== null) {
+      Logger.debug(`[VideoWorkerContext] 绘制帧 ${this._frameIndex}`);
       this._drawFrameImpl(this._form, this._frameIndex);
+    } else {
+      Logger.warn(`[VideoWorkerContext] 无法绘制帧，画布或表单为空`);
     }
   }
 
@@ -624,8 +637,16 @@ export default class VideoWorkerContext {
     maxSteps: number = 40,
   ): Promise<void> {
     if (this._decodedVideo === null) {
+      Logger.warn(`[VideoWorkerContext] 无法绘制帧 ${frameIndex}，解码视频为空`);
       return;
     }
+
+    if (frameIndex < 0 || frameIndex >= this._decodedVideo.frames.length) {
+      Logger.warn(`[VideoWorkerContext] 帧索引 ${frameIndex} 超出范围 (0-${this._decodedVideo.frames.length - 1})`);
+      return;
+    }
+
+    Logger.debug(`[VideoWorkerContext] 开始绘制帧 ${frameIndex}/${this._decodedVideo.frames.length - 1}`);
 
     {
       this._stats.videoFps?.begin();

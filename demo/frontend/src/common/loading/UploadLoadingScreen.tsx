@@ -27,8 +27,8 @@ export default function UploadLoadingScreen() {
   if (uploadingState === 'error') {
     return (
       <LoadingStateScreen
-        title="Uh oh, we cannot process this video"
-        description="Please upload another video, and make sure that the video’s file size is less than 70Mb. ">
+        title="哎呀，我们无法处理这个视频"
+        description="请上传另一个视频，并确保视频文件大小小于 70MB。">
         <div className="max-w-[250px] w-full mx-auto">
           <ChangeVideoModal
             videoGalleryModalTrigger={UploadLoadingScreenChangeVideoTrigger}
@@ -40,8 +40,8 @@ export default function UploadLoadingScreen() {
 
   return (
     <LoadingStateScreen
-      title="Uploading video..."
-      description="Sit tight while we upload your video."
+      title="正在上传视频..."
+      description="请稍等，我们正在上传您的视频。"
     />
   );
 }
@@ -52,7 +52,7 @@ function UploadLoadingScreenChangeVideoTrigger({
   return (
     <OptionButton
       variant="gradient"
-      title="Change video"
+      title="更换视频"
       Icon={ImageCopy}
       onClick={onClick}
     />

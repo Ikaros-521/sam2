@@ -395,6 +395,9 @@ class InferenceAPI:
                 logger.info(
                     f"propagation ended in session {session_id}; {self.__get_session_stats()}"
                 )
+                
+                # 视频处理完成后，清理缓存以释放内存
+                self.__cleanup_session_cache_after_propagation(session_id)
 
     def cancel_propagate_in_video(
         self, request: CancelPropagateInVideoRequest
@@ -465,5 +468,154 @@ class InferenceAPI:
             )
             return False
         else:
+            # 清理会话相关的缓存和GPU内存
+            self.__cleanup_session_cache(session)
             logger.info(f"removed session {session_id}; {self.__get_session_stats()}")
             return True
+
+    def __cleanup_session_cache(self, session: Dict[str, Any]) -> None:
+        """清理会话相关的缓存和GPU内存"""
+        try:
+            # 清理推理状态中的缓存
+            if "state" in session:
+                inference_state = session["state"]
+                
+                # 清理缓存的图像特征
+                if "cached_features" in inference_state:
+                    inference_state["cached_features"].clear()
+                
+                # 清理视频帧数据
+                if "images" in inference_state:
+                    # 将视频帧数据移动到CPU或删除
+                    for i, image in enumerate(inference_state["images"]):
+                        if hasattr(image, 'cpu'):
+                            inference_state["images"][i] = image.cpu()
+                    # 清空图像列表
+                    inference_state["images"].clear()
+                
+                # 清理输出字典
+                if "output_dict_per_obj" in inference_state:
+                    for obj_output_dict in inference_state["output_dict_per_obj"].values():
+                        if "cond_frame_outputs" in obj_output_dict:
+                            obj_output_dict["cond_frame_outputs"].clear()
+                        if "non_cond_frame_outputs" in obj_output_dict:
+                            obj_output_dict["non_cond_frame_outputs"].clear()
+                
+                # 清理临时输出字典
+                if "temp_output_dict_per_obj" in inference_state:
+                    for obj_temp_output_dict in inference_state["temp_output_dict_per_obj"].values():
+                        if "cond_frame_outputs" in obj_temp_output_dict:
+                            obj_temp_output_dict["cond_frame_outputs"].clear()
+                        if "non_cond_frame_outputs" in obj_temp_output_dict:
+                            obj_temp_output_dict["non_cond_frame_outputs"].clear()
+                
+                # 清理其他缓存
+                if "point_inputs_per_obj" in inference_state:
+                    inference_state["point_inputs_per_obj"].clear()
+                if "mask_inputs_per_obj" in inference_state:
+                    inference_state["mask_inputs_per_obj"].clear()
+                if "frames_tracked_per_obj" in inference_state:
+                    inference_state["frames_tracked_per_obj"].clear()
+                
+                # 清理对象映射
+                if "obj_id_to_idx" in inference_state:
+                    inference_state["obj_id_to_idx"].clear()
+                if "obj_idx_to_id" in inference_state:
+                    inference_state["obj_idx_to_id"].clear()
+                if "obj_ids" in inference_state:
+                    inference_state["obj_ids"].clear()
+            
+            # 强制清理GPU内存
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                logger.info("GPU cache cleared after session cleanup")
+                
+        except Exception as e:
+            logger.error(f"Error during session cache cleanup: {e}")
+
+    def __cleanup_session_cache_after_propagation(self, session_id: str) -> None:
+        """在视频传播完成后清理缓存，但保留会话状态"""
+        try:
+            session = self.session_states.get(session_id, None)
+            if session is None:
+                logger.warning(f"Session {session_id} not found for cache cleanup")
+                return
+            
+            inference_state = session["state"]
+            
+            # 清理缓存的图像特征（保留最近一帧用于交互）
+            if "cached_features" in inference_state:
+                # 只保留最近的一帧特征，清理其他帧
+                cached_frames = list(inference_state["cached_features"].keys())
+                if len(cached_frames) > 1:
+                    # 保留最后一帧，清理其他帧
+                    latest_frame = max(cached_frames)
+                    latest_feature = inference_state["cached_features"][latest_frame]
+                    inference_state["cached_features"].clear()
+                    inference_state["cached_features"][latest_frame] = latest_feature
+                    logger.info(f"Cleaned cached features, kept frame {latest_frame}")
+            
+            # 清理非条件帧的输出（保留条件帧输出用于后续交互）
+            if "output_dict_per_obj" in inference_state:
+                for obj_idx, obj_output_dict in inference_state["output_dict_per_obj"].items():
+                    if "non_cond_frame_outputs" in obj_output_dict:
+                        non_cond_count = len(obj_output_dict["non_cond_frame_outputs"])
+                        obj_output_dict["non_cond_frame_outputs"].clear()
+                        logger.info(f"Cleaned {non_cond_count} non-conditioning outputs for object {obj_idx}")
+            
+            # 清理临时输出字典
+            if "temp_output_dict_per_obj" in inference_state:
+                for obj_idx, obj_temp_output_dict in inference_state["temp_output_dict_per_obj"].items():
+                    if "cond_frame_outputs" in obj_temp_output_dict:
+                        obj_temp_output_dict["cond_frame_outputs"].clear()
+                    if "non_cond_frame_outputs" in obj_temp_output_dict:
+                        obj_temp_output_dict["non_cond_frame_outputs"].clear()
+            
+            # 清理已跟踪帧的记录（保留基本信息）
+            if "frames_tracked_per_obj" in inference_state:
+                for obj_idx, frames_tracked in inference_state["frames_tracked_per_obj"].items():
+                    frames_tracked.clear()
+            
+            # 强制清理GPU内存
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                logger.info(f"GPU cache cleared after propagation for session {session_id}")
+                
+        except Exception as e:
+            logger.error(f"Error during post-propagation cache cleanup for session {session_id}: {e}")
+
+    def cleanup_all_sessions_cache(self) -> None:
+        """清理所有会话的缓存，释放GPU内存"""
+        try:
+            logger.info(f"Starting cleanup for {len(self.session_states)} sessions")
+            
+            for session_id, session in self.session_states.items():
+                try:
+                    self.__cleanup_session_cache_after_propagation(session_id)
+                except Exception as e:
+                    logger.error(f"Error cleaning up session {session_id}: {e}")
+            
+            # 最终清理GPU内存
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                logger.info("Final GPU cache cleanup completed")
+                
+        except Exception as e:
+            logger.error(f"Error during global cache cleanup: {e}")
+
+    def get_memory_usage_stats(self) -> Dict[str, Any]:
+        """获取内存使用统计信息"""
+        stats = {
+            "active_sessions": len(self.session_states),
+            "session_ids": list(self.session_states.keys())
+        }
+        
+        if torch.cuda.is_available():
+            stats.update({
+                "gpu_memory_allocated_mb": torch.cuda.memory_allocated() // 1024**2,
+                "gpu_memory_reserved_mb": torch.cuda.memory_reserved() // 1024**2,
+                "gpu_max_memory_allocated_mb": torch.cuda.max_memory_allocated() // 1024**2,
+                "gpu_max_memory_reserved_mb": torch.cuda.max_memory_reserved() // 1024**2,
+            })
+        
+        return stats

@@ -41,7 +41,7 @@ export default function MoreOptionsToolbar({onTabChange}: Props) {
     <div className="flex flex-col h-full">
       <div className="grow">
         <ToolbarHeaderWrapper
-          title="Nice work! What's next?"
+          title="干得好！接下来做什么？"
           className="pb-0 !border-b-0 !text-white"
           showProgressChip={false}
         />

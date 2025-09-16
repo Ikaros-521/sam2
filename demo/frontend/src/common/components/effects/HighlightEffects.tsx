@@ -30,7 +30,7 @@ export default function HighlightEffects() {
   const activeEffectsGroup = useAtomValue(activeHighlightEffectGroupAtom);
 
   return (
-    <ToolbarSection title="Selected Objects" borderBottom={true}>
+    <ToolbarSection title="选中对象" borderBottom={true}>
       {activeEffectsGroup.map(highlightEffect => {
         return (
           <ToolbarActionIcon

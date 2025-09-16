@@ -16,6 +16,7 @@ parser.add_argument('--green_screen', action='store_true', help='扣完转绿幕
 parser.add_argument('--save_output', action='store_true', help='是否保存输出视频')
 parser.add_argument('--output_path', type=str, default='output_masked.mp4', help='输出视频路径')
 parser.add_argument('--no_fps', action='store_true', help='不在画面上显示FPS（默认显示）')
+parser.add_argument('--mask_dilate', type=int, default=0, help='mask膨胀(>0)或收缩(<0)的像素数，默认0')
 args = parser.parse_args()
 
 VIDEO_PATH = args.video_path
@@ -25,6 +26,7 @@ GREEN_SCREEN = args.green_screen
 SAVE_OUTPUT = args.save_output
 OUTPUT_PATH = args.output_path
 NO_FPS = args.no_fps
+MASK_DILATE = args.mask_dilate
 
 # ========== 初始化API和Session ===========
 api = InferenceAPI()
@@ -45,12 +47,17 @@ if not ret:
 
 
 def update_mask():
+    # 定义一个全局变量，用于更新mask
     global mask, points, labels, frame, api, session_id
+    # 如果points为空，则将mask初始化为全零矩阵
     if not points:
         mask = np.zeros(frame.shape[:2], dtype=np.uint8)
         return
+    # 获取frame的宽度和高度
     h, w = frame.shape[:2]
+    # 将points中的点归一化
     norm_points = [[x / w, y / h] for (x, y) in points]
+    # 创建一个AddPointsRequest对象，用于添加点
     request = AddPointsRequest(
         type='add_points',
         session_id=session_id,
@@ -60,18 +67,23 @@ def update_mask():
         labels=labels,
         clear_old_points=True
     )
+    # 调用api的add_points方法，获取response
     response = api.add_points(request)
     # 合并所有目标的mask（如果有多个object_id）
     mask_sum = np.zeros(frame.shape[:2], dtype=np.uint8)
     for r in response.results:
+        # 将rle编码的mask解码
         mask_rle = {
             'counts': r.mask.counts,
             'size': r.mask.size
         }
         m = decode_mask(mask_rle)
+        # 如果mask是多维的，则取第一维
         if m.ndim == 3:
             m = m[:, :, 0]
+        # 将mask_sum和m进行逻辑或运算
         mask_sum = np.logical_or(mask_sum, m)
+    # 将mask_sum转换为uint8类型
     mask = mask_sum.astype(np.uint8)
 
 
@@ -140,17 +152,37 @@ for response in api.propagate_in_video(PropagateInVideoRequest(
     if not ret:
         break
     # 合并所有目标体的mask
+    # 创建一个与frame相同大小的全零数组
     mask_sum = np.zeros(frame.shape[:2], dtype=np.uint8)
+    # 遍历response.results中的每个结果
     for r in response.results:
+        # 将结果中的mask转换为rle格式
         mask_rle = {
             'counts': r.mask.counts,
             'size': r.mask.size
         }
+        # 将rle格式的mask解码为numpy数组
         m = decode_mask(mask_rle)
+        # 如果解码后的mask是三维的，则取第一维
         if m.ndim == 3:
             m = m[:, :, 0]
+        # 将解码后的mask与mask_sum进行逻辑或运算
         mask_sum = np.logical_or(mask_sum, m)
+    # 将mask_sum转换为uint8类型
     mask = mask_sum.astype(np.uint8)
+    # mask膨胀/收缩
+    # 如果MASK_DILATE不等于0
+    if MASK_DILATE != 0:
+        # 创建一个核，大小为MASK_DILATE的绝对值
+        kernel = np.ones((abs(MASK_DILATE), abs(MASK_DILATE)), np.uint8)
+        # 如果MASK_DILATE大于0
+        if MASK_DILATE > 0:
+            # 对mask进行膨胀操作
+            mask = cv2.dilate(mask, kernel, iterations=1)
+        # 否则
+        else:
+            # 对mask进行腐蚀操作
+            mask = cv2.erode(mask, kernel, iterations=1)
 
     # 保留前景还是背景
     if KEEP_FOREGROUND:

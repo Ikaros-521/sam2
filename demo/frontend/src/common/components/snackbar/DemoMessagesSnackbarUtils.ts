@@ -39,42 +39,42 @@ export interface MessagesEventMap {
 
 export const defaultMessageMap: MessagesEventMap = {
   startSession: {
-    text: 'Starting session',
+    text: '正在启动会话',
     shown: false,
     options: {type: 'loading', showClose: false, repeat: true, duration: 2000},
   },
   firstClick: {
-    text: 'Tip: Click on any object in the video to get started.',
+    text: '提示：点击视频中的任意对象开始操作。',
     shown: false,
     options: {expire: false, repeat: false},
   },
   pointClick: {
-    text: 'Tip: Not what you expected? Add a few more clicks until the full object you want is selected.',
+    text: '提示：不是您想要的结果？继续点击直到选中您想要的完整对象。',
     shown: false,
     options: {expire: false, repeat: false},
   },
   addObjectClick: {
-    text: 'Tip: Add a new object by clicking on it in the video.',
+    text: '提示：通过点击视频中的对象来添加新对象。',
     shown: false,
     options: {expire: false, repeat: false},
   },
   trackAndPlayClick: {
-    text: 'Hang tight while your objects are tracked! You’ll be able to apply visual effects in the next step. Stop tracking at any point to adjust your selections if the tracking doesn’t look right.',
+    text: '当你的物体被追踪时，请抓紧！在下一步中，您将能够应用视觉效果。如果跟踪看起来不正确，请随时停止跟踪以调整您的选择。',
     shown: false,
     options: {expire: false, repeat: false},
   },
   trackAndPlayComplete: {
-    text: 'Tip: You can fix tracking issues by going back to the frames where tracking is not quite right and adding or removing clicks.',
+    text: '提示：您可以通过返回跟踪不太正确的帧并添加或删除点击来修复跟踪问题。',
     shown: false,
     options: {expire: false, repeat: false},
   },
   trackAndPlayThrottlingWarning: {
-    text: 'Looks like you have clicked the tracking button a bit too often! To keep things running smoothly, we have temporarily disabled the button.',
+    text: '看起来您点击跟踪按钮过于频繁！为了保持运行顺畅，我们暂时禁用了该按钮。',
     shown: false,
     options: {repeat: true},
   },
   effectsMessage: {
-    text: 'Tip: If you aren’t sure where to get started, click “Surprise Me” to apply a surprise effect to your video.',
+    text: '提示：如果您不确定从哪里开始，请点击"给我惊喜"为您的视频应用惊喜效果。',
     shown: false,
     options: {expire: false, repeat: false},
   },

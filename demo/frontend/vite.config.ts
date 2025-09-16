@@ -26,7 +26,35 @@ import {stylexPlugin} from 'vite-plugin-stylex-dev';
 export default defineConfig({
   server: {
     host: '0.0.0.0', // 监听所有 IP
-    // port: 你想要的端口号（可选）
+    // port: 8080, // 指定端口
+    proxy: {
+      '/graphql': {
+        target: 'http://117.50.178.209:7263',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/graphql/, '/graphql'),
+      },
+      '/propagate_in_video': {
+        target: 'http://117.50.178.209:7263',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/uploads': {
+        target: 'http://117.50.178.209:7263',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/gallery': {
+        target: 'http://117.50.178.209:7263',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/posters': {
+        target: 'http://117.50.178.209:7263',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     // https: {
     //   key: fs.readFileSync('key.pem'),
     //   cert: fs.readFileSync('cert.pem'),

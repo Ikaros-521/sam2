@@ -32,7 +32,7 @@ export default function CloseSessionButton({onSessionClose}: Props) {
 
   return (
     <PrimaryCTAButton onClick={handleCloseSession} endIcon={<ChevronRight />}>
-      Good to go
+      完成
     </PrimaryCTAButton>
   );
 }

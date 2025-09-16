@@ -60,17 +60,17 @@ export default function UploadOption({onUpload}: Props) {
         variant="gradient"
         title={
           error !== null ? (
-            'Upload Error'
+            '上传错误'
           ) : isMobile ? (
             <>
-              Upload{' '}
+              上传{' '}
               <div className="text-xs opacity-70">
                 Max {MAX_UPLOAD_FILE_SIZE}
               </div>
             </>
           ) : (
             <>
-              Upload your own{' '}
+              上传您自己的{' '}
               <div className="text-xs opacity-70">
                 Max {MAX_UPLOAD_FILE_SIZE}
               </div>
@@ -78,7 +78,7 @@ export default function UploadOption({onUpload}: Props) {
           )
         }
         Icon={error !== null ? Close : CloudUpload}
-        loadingProps={{loading: isUploading, label: 'Uploading...'}}
+        loadingProps={{loading: isUploading, label: '正在上传...'}}
         onClick={() => {}}
       />
     </div>

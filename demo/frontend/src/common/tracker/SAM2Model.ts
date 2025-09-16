@@ -719,7 +719,8 @@ export class SAM2Model extends Tracker {
     sessionId: string,
     startFrameIndex: undefined | number = 0,
   ): AsyncGenerator<StreamMasksResult | StreamMasksAbortResult, undefined> {
-    const url = `${this._endpoint}/propagate_in_video`;
+    // 使用相对路径，通过Vite代理转发
+    const url = '/propagate_in_video';
 
     const requestBody = {
       session_id: sessionId,

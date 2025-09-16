@@ -42,8 +42,8 @@ export default function EffectsToolbarHeader() {
 
   return (
     <ToolbarHeaderWrapper
-      title="Add effects"
-      description="Apply visual effects to your selected objects and the background. Keeping clicking the same effect for different variations."
+      title="添加效果"
+      description="将视觉效果应用于所选对象和背景。为不同的变化保持相同的效果。"
       bottomSection={
         <div className="flex mt-1">
           <Button
@@ -52,7 +52,7 @@ export default function EffectsToolbarHeader() {
             className={`font-medium bg-black !rounded-full hover:!bg-gradient-to-br ${BLUE_PINK_FILL} border-none`}
             endIcon={<MagicWandFilled size={20} className="text-white " />}
             onClick={handleTogglePreset}>
-            Surprise Me
+            随机效果
           </Button>
         </div>
       }

@@ -36,13 +36,12 @@ export default function MobileFirstClickBanner() {
   return (
     <div {...stylex.props(styles.container)}>
       <div className="flex text-white text-lg">
-        Click an object in the video to start
+        点击视频中的对象开始
       </div>
       <div className="text-sm text-[#A7B3BF]">
         <p>
-          You&apos;ll be able to use {DEMO_SHORT_NAME} to make fun edits to any
-          video by tracking objects and applying visual effects. To start, click
-          any object in the video.
+          您可以使用 {DEMO_SHORT_NAME} 对任何视频进行有趣编辑，通过跟踪对象和应用视觉效果。要开始，请点击视频中的任何对象。
+          通过跟踪对象和应用视觉效果来播放视频。首先，单击视频中的任何对象。
         </p>
       </div>
       <div className="flex items-center">
@@ -68,7 +67,7 @@ function MobileVideoGalleryModalTrigger({
       startIcon={<ImageCopy size={20} />}
       onClick={onClick}
       className="text-white p-0">
-      Change video
+      更换视频
     </Button>
   );
 }

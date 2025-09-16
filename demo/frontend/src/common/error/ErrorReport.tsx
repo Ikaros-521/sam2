@@ -63,7 +63,7 @@ export default function ErrorReport({onReport = emptyFunction}: Props) {
   return (
     <Modal ref={errorModalRef} className="max-w-[800px]">
       <Modal.Header>
-        {error != null ? getErrorTitle(error) : 'Unknown error'}
+        {error != null ? getErrorTitle(error) : '未知错误'}
       </Modal.Header>
       <Modal.Body>
         <Editor
@@ -85,9 +85,9 @@ export default function ErrorReport({onReport = emptyFunction}: Props) {
           color="error"
           startIcon={<BugAntIcon className="w-4 h-4" />}
           onClick={handleReport}>
-          Report
+          报告
         </Button>
-        <Button onClick={handleCloseModal}>Close</Button>
+        <Button onClick={handleCloseModal}>关闭</Button>
       </Modal.Actions>
     </Modal>
   );

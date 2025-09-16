@@ -31,8 +31,9 @@ export const ABOUT_URL = 'https://ai.meta.com/sam2';
 export const EMAIL_ADDRESS = 'segment-anything@meta.com';
 export const BLOG_URL = 'http://ai.meta.com/blog/sam2';
 
-export const VIDEO_API_ENDPOINT = 'http://172.16.95.191:7263';
-export const INFERENCE_API_ENDPOINT = 'http://172.16.95.191:7263';
+// 使用代理，使用相对路径
+export const VIDEO_API_ENDPOINT = '';
+export const INFERENCE_API_ENDPOINT = '';
 
 export const demoObjectLimit = 3;
 

@@ -34,7 +34,7 @@ export default function RestartSessionButton({onRestartSession}: Props) {
       onClick={handleRestartSession}
       className="!px-4 !rounded-full font-medium text-white hover:bg-black"
       startIcon={isLoading ? <Loading size="sm" /> : <Reset size={20} />}>
-      Start over
+      重新开始
     </Button>
   );
 }

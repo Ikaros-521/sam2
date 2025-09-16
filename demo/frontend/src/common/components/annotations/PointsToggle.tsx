@@ -30,13 +30,13 @@ export default function PointsToggle() {
         <button
           className={`w-1/2  btn join-item text-white ${buttonStyle(isPositive)}`}
           onClick={() => setLabelType('positive')}>
-          <AddFilled size={24} className="text-blue-500" /> Add
+          <AddFilled size={24} className="text-blue-500" /> 添加
         </button>
         <button
           className={`w-1/2 btn join-item text-red-700 ${buttonStyle(!isPositive)}`}
           onClick={() => setLabelType('negative')}>
           <SubtractFilled size={24} className="text-red-400" />
-          Remove
+          移除
         </button>
       </div>
     </div>

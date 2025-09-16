@@ -18,11 +18,11 @@ import LoadingStateScreen from '@/common/loading/LoadingStateScreen';
 export default function PageNotFoundPage() {
   return (
     <LoadingStateScreen
-      title="Page not found"
-      description="It looks like you might be in the wrong place."
+      title="页面未找到"
+      description="看起来您可能走错了地方。"
       linkProps={{
         to: '..',
-        label: 'Click here to access the SAM 2 Demo',
+        label: '点击这里访问 SAM 2 演示',
       }}
     />
   );

@@ -49,41 +49,41 @@ export type DemoEffect = {
 };
 
 export const backgroundEffects: DemoEffect[] = [
-  {title: 'Original', Icon: Image, effectName: 'Original'},
-  {title: 'Erase', Icon: Erase, effectName: 'EraseBackground'},
+  {title: '原始', Icon: Image, effectName: 'Original'},
+  {title: '擦除', Icon: Erase, effectName: 'EraseBackground'},
   {
-    title: 'Gradient',
+    title: '渐变',
     Icon: ColorPalette,
     effectName: 'Gradient',
   },
   {
-    title: 'Pixelate',
+    title: '像素化',
     Icon: Development,
     effectName: 'Pixelate',
   },
-  {title: 'Desaturate', Icon: ColorSwitch, effectName: 'Desaturate'},
-  {title: 'Text', Icon: TextFont, effectName: 'BackgroundText'},
-  {title: 'Blur', Icon: Humidity, effectName: 'BackgroundBlur'},
-  {title: 'Outline', Icon: AppleDash, effectName: 'Sobel'},
+  {title: '去饱和', Icon: ColorSwitch, effectName: 'Desaturate'},
+  {title: '文字', Icon: TextFont, effectName: 'BackgroundText'},
+  {title: '模糊', Icon: Humidity, effectName: 'BackgroundBlur'},
+  {title: '轮廓', Icon: AppleDash, effectName: 'Sobel'},
 ];
 
 export const highlightEffects: DemoEffect[] = [
-  {title: 'Original', Icon: Image, effectName: 'Cutout'},
-  {title: 'Erase', Icon: Erase, effectName: 'EraseForeground'},
-  {title: 'Gradient', Icon: ColorPalette, effectName: 'VibrantMask'},
-  {title: 'Pixelate', Icon: Development, effectName: 'PixelateMask'},
+  {title: '原始', Icon: Image, effectName: 'Cutout'},
+  {title: '擦除', Icon: Erase, effectName: 'EraseForeground'},
+  {title: '渐变', Icon: ColorPalette, effectName: 'VibrantMask'},
+  {title: '像素化', Icon: Development, effectName: 'PixelateMask'},
   {
-    title: 'Overlay',
+    title: '叠加',
     Icon: Overlay,
     effectName: 'Overlay',
   },
-  {title: 'Emoji', Icon: FaceWink, effectName: 'Replace'},
-  {title: 'Burst', Icon: Asterisk, effectName: 'Burst'},
-  {title: 'Spotlight', Icon: CenterCircle, effectName: 'Scope'},
+  {title: '表情', Icon: FaceWink, effectName: 'Replace'},
+  {title: '爆炸', Icon: Asterisk, effectName: 'Burst'},
+  {title: '聚光灯', Icon: CenterCircle, effectName: 'Scope'},
 ];
 
 export const moreEffects: DemoEffect[] = [
-  {title: 'Noisy', Icon: Barcode, effectName: 'NoisyMask'},
+  {title: '噪点', Icon: Barcode, effectName: 'NoisyMask'},
 ];
 
 // Store existing content in a temporary canvas

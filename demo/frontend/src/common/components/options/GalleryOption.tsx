@@ -38,7 +38,7 @@ function GalleryTrigger({onClick}: VideoGalleryTriggerProps) {
   return (
     <OptionButton
       variant="flat"
-      title={isMobile ? 'Gallery' : 'Browse gallery'}
+      title={isMobile ? '图库' : '浏览图库'}
       Icon={ImageCopy}
       onClick={onClick}
     />

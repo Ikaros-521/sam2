@@ -32,13 +32,12 @@ export default function FirstClickView() {
   return (
     <div className="w-full h-full flex flex-col p-8">
       <div className="grow flex flex-col gap-6">
-        <h2 className="text-2xl">Click an object in the video to start</h2>
+        <h2 className="text-2xl">点击视频中的对象开始</h2>
         <p className="!text-gray-60">
-          You&apos;ll be able to use {DEMO_SHORT_NAME} to make fun edits to any
-          video by tracking objects and applying visual effects.
+          您将能够使用 {DEMO_SHORT_NAME} 通过跟踪对象和应用视觉效果对任何视频进行有趣的编辑。
         </p>
         <p className="!text-gray-60">
-          To start, click any object in the video.
+          首先，单击视频中的任何对象。
         </p>
       </div>
       <div className="flex items-center">
